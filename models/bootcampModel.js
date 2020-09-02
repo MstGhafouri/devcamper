@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 const slugify = require('slugify');
+const geocoder = require('../utils/geocoder');
 
 const bootcampSchema = new mongoose.Schema({
   name: {
@@ -102,6 +103,25 @@ bootcampSchema.index({ startLocation: '2dsphere' });
 // Create slug before saving document
 bootcampSchema.pre('save', function (next) {
   this.slug = slugify(this.name, { lower: true });
+  next();
+});
+
+// Create and geocode location field
+bootcampSchema.pre('save', async function (next) {
+  const loc = (await geocoder.geocode(this.address))[0];
+
+  this.location = {
+    type: 'Point',
+    coordinates: [loc.longitude, loc.latitude],
+    formattedAddress: loc.formattedAddress,
+    street: loc.street,
+    city: loc.city,
+    state: loc.stateCode,
+    zipcode: loc.zipcode,
+    country: loc.countryCode
+  };
+  // Remove address field from the document
+  this.address = undefined;
   next();
 });
 
