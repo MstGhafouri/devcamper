@@ -5,7 +5,12 @@ const catchAsync = require('../utils/catchAsync');
 // Get all documents
 exports.getAll = Model =>
   catchAsync(async (req, res, next) => {
-    const apiFeatures = new APIFeatures(Model.find(), req.query)
+    // To allow nested Get courses on Bootcamp
+    // /api/v1/bootcamps/:bootcampId/courses
+    let filter = {};
+    if (req.params.bootcampId) filter = { bootcamp: req.params.bootcampId };
+
+    const apiFeatures = new APIFeatures(Model.find(filter), req.query)
       .filter()
       .sort()
       .limitFields()
@@ -23,9 +28,11 @@ exports.getAll = Model =>
   });
 
 // Get one document
-exports.getOne = Model =>
+exports.getOne = (Model, populateOptions) =>
   catchAsync(async (req, res, next) => {
-    const doc = await Model.findById(req.params.id);
+    let query = Model.findById(req.params.id);
+    if (populateOptions) query = query.populate(populateOptions);
+    const doc = await query;
 
     const modelName = Model.collection.name.slice(0, -1);
     if (!doc)
@@ -76,10 +83,12 @@ exports.updateOne = Model =>
 // Delete one document
 exports.deleteOne = Model =>
   catchAsync(async (req, res, next) => {
-    const doc = await Model.findByIdAndDelete(req.params.id);
+    const doc = await Model.findById(req.params.id);
 
     if (!doc)
       return next(new ErrorResponse('No document found with that ID', 404));
+
+    doc.remove(); // Remove it in this way to trigger the pre hook middleware
 
     res.status(204).json({
       status: 'success',

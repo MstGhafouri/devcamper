@@ -31,7 +31,7 @@ exports.getBootcampsWithinRadius = catchAsync(async (req, res, next) => {
 
 // CRUD operations Handlers ( Create, Read, Update, Delete)
 exports.getAllBootcamps = serviceController.getAll(Bootcamp);
-exports.getBootcamp = serviceController.getOne(Bootcamp);
+exports.getBootcamp = serviceController.getOne(Bootcamp, { path: 'courses' });
 exports.createNewBootcamp = serviceController.createOne(Bootcamp);
 exports.updateBootcamp = serviceController.updateOne(Bootcamp);
 exports.deleteBootcamp = serviceController.deleteOne(Bootcamp);

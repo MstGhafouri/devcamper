@@ -1,8 +1,11 @@
 const express = require('express');
 
 const bootcampController = require('../controllers/bootcampController');
+const courseRouter = require('./courseRoutes');
 
 const router = express.Router();
+// Nested route handler
+router.use('/:bootcampId/courses', courseRouter);
 
 router
   .route('/within/:distance/zipcode/:zipcode/unit/:unit')
