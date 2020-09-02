@@ -1,10 +1,17 @@
 const ErrorResponse = require('../utils/errorResponse');
+const APIFeatures = require('../utils/apiFeatures');
 const catchAsync = require('../utils/catchAsync');
 
 // Get all documents
 exports.getAll = Model =>
   catchAsync(async (req, res, next) => {
-    const docs = await Model.find();
+    const apiFeatures = new APIFeatures(Model.find(), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+
+    const docs = await apiFeatures.query;
 
     res.status(200).json({
       status: 'success',
