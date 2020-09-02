@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const slugify = require('slugify');
 
 const bootcampSchema = new mongoose.Schema({
   name: {
@@ -97,6 +98,12 @@ const bootcampSchema = new mongoose.Schema({
 });
 
 bootcampSchema.index({ startLocation: '2dsphere' });
+
+// Create slug before saving document
+bootcampSchema.pre('save', function (next) {
+  this.slug = slugify(this.name, { lower: true });
+  next();
+});
 
 const Bootcamp = mongoose.model('Bootcamp', bootcampSchema);
 
