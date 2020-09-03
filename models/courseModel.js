@@ -79,12 +79,12 @@ courseSchema.statics.calcAverageCost = async function (bootcampId) {
   }
 };
 
-courseSchema.post('save', function () {
-  this.constructor.calcAverageCost(this.bootcamp);
+courseSchema.post('save', async function () {
+  await this.constructor.calcAverageCost(this.bootcamp);
 });
 
-courseSchema.pre('remove', function () {
-  this.constructor.calcAverageCost(this.bootcamp);
+courseSchema.pre('remove', async function () {
+  await this.constructor.calcAverageCost(this.bootcamp);
 });
 
 courseSchema.pre(/^findOneAnd/, async function (next) {
