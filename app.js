@@ -1,5 +1,7 @@
+const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
+const fileUpload = require('express-fileupload');
 
 const ErrorResponse = require('./utils/errorResponse');
 const globalErrorHandler = require('./controllers/errorController');
@@ -13,6 +15,11 @@ app.use(express.json());
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
+
+// Express file upload middleware for uploading bootcamp images
+app.use(fileUpload());
+// Serve static files
+app.use(express.static(path.resolve(__dirname, 'public')));
 
 // Routes handler
 app.use('/api/v1/bootcamps', bootcampRouter);

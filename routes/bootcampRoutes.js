@@ -11,6 +11,8 @@ router
   .route('/within/:distance/zipcode/:zipcode/unit/:unit')
   .get(bootcampController.getBootcampsWithinRadius);
 
+router.patch('/:id/photo', bootcampController.photoUpload);
+
 router
   .route('/')
   .get(bootcampController.getAllBootcamps)

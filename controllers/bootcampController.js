@@ -1,7 +1,62 @@
+const path = require('path');
 const Bootcamp = require('../models/bootcampModel');
 const serviceController = require('./serviceController');
+const ErrorResponse = require('../utils/errorResponse');
 const geocoder = require('../utils/geocoder');
 const catchAsync = require('../utils/catchAsync');
+
+exports.photoUpload = catchAsync(async (req, res, next) => {
+  const doesBootcampExit = await Bootcamp.exists({ _id: req.params.id });
+  if (!doesBootcampExit)
+    return next(new ErrorResponse('No bootcamp found with that ID', 404));
+
+  if (!req.files)
+    return next(new ErrorResponse('Please upload a photo first', 400));
+
+  const { photo } = req.files;
+
+  if (!photo)
+    return next(
+      new ErrorResponse("No 'photo' found in the uploaded files", 400)
+    );
+
+  if (!photo.mimetype.startsWith('image'))
+    return next(new ErrorResponse('Not an image', 400));
+
+  if (photo.size > process.env.MAX_FILE_SIZE)
+    return next(
+      new ErrorResponse(
+        `Please upload an image less than ${process.env.MAX_FILE_SIZE} bytes`,
+        400
+      )
+    );
+
+  // Set file name
+  photo.name = `bootcamp-photo-${req.params.id}${path.parse(photo.name).ext}`;
+
+  photo.mv(`${process.env.FILE_UPLOAD_PATH}/${photo.name}`, async err => {
+    if (err) {
+      // eslint-disable-next-line no-console
+      console.error('Error uploading file: ', err);
+      return next(
+        new ErrorResponse('An error occurred while uploading the file', 500)
+      );
+    }
+
+    const bootcamp = await Bootcamp.findByIdAndUpdate(
+      req.params.id,
+      { photo: photo.name },
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        bootcamp
+      }
+    });
+  });
+});
 
 // Get all bootcamps within a certain radius from a point
 // api/v1/bootcamps/within/:distance/zipcode/:zipcode/unit/:unit
