@@ -1,6 +1,7 @@
 const express = require('express');
 
 const bootcampController = require('../controllers/bootcampController');
+const authController = require('../controllers/authController');
 const courseRouter = require('./courseRoutes');
 
 const router = express.Router();
@@ -11,16 +12,21 @@ router
   .route('/within/:distance/zipcode/:zipcode/unit/:unit')
   .get(bootcampController.getBootcampsWithinRadius);
 
+router.get('/', bootcampController.getAllBootcamps);
+router.get('/:id', bootcampController.getBootcamp);
+
+// Protect and restrict all the following routes
+router.use(
+  authController.protect,
+  authController.restrictTo('admin', 'publisher')
+);
+
 router.patch('/:id/photo', bootcampController.photoUpload);
 
-router
-  .route('/')
-  .get(bootcampController.getAllBootcamps)
-  .post(bootcampController.createNewBootcamp);
+router.post('/', bootcampController.createNewBootcamp);
 
 router
   .route('/:id')
-  .get(bootcampController.getBootcamp)
   .patch(bootcampController.updateBootcamp)
   .delete(bootcampController.deleteBootcamp);
 
