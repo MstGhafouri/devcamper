@@ -48,6 +48,11 @@ const courseSchema = new mongoose.Schema(
       type: mongoose.Schema.ObjectId,
       ref: 'Bootcamp',
       required: [true, 'Course must belong to a bootcamp']
+    },
+    user: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
+      required: [true, 'Course must belong to a user']
     }
   },
   {
