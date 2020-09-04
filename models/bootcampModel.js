@@ -80,6 +80,11 @@ const bootcampSchema = new mongoose.Schema(
       type: String,
       default: 'no-photo.jpg'
     },
+    user: {
+      type: mongoose.Schema.ObjectId,
+      ref: 'User',
+      required: [true, 'Bootcamp must belong to a user']
+    },
     housing: {
       type: Boolean,
       default: false

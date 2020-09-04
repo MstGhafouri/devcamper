@@ -21,13 +21,24 @@ router.use(
   authController.restrictTo('admin', 'publisher')
 );
 
-router.patch('/:id/photo', bootcampController.photoUpload);
+router.patch(
+  '/:id/photo',
+  bootcampController.handlePermission,
+  bootcampController.photoUpload
+);
 
-router.post('/', bootcampController.createNewBootcamp);
+router.post(
+  '/',
+  bootcampController.setUserId,
+  bootcampController.createNewBootcamp
+);
 
 router
   .route('/:id')
-  .patch(bootcampController.updateBootcamp)
-  .delete(bootcampController.deleteBootcamp);
+  .patch(bootcampController.handlePermission, bootcampController.updateBootcamp)
+  .delete(
+    bootcampController.handlePermission,
+    bootcampController.deleteBootcamp
+  );
 
 module.exports = router;

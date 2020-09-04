@@ -6,10 +6,6 @@ const geocoder = require('../utils/geocoder');
 const catchAsync = require('../utils/catchAsync');
 
 exports.photoUpload = catchAsync(async (req, res, next) => {
-  const doesBootcampExit = await Bootcamp.exists({ _id: req.params.id });
-  if (!doesBootcampExit)
-    return next(new ErrorResponse('No bootcamp found with that ID', 404));
-
   if (!req.files)
     return next(new ErrorResponse('Please upload a photo first', 400));
 
@@ -82,6 +78,38 @@ exports.getBootcampsWithinRadius = catchAsync(async (req, res, next) => {
       bootcamps
     }
   });
+});
+
+// Set user id into req.body and check if user has permission to publish a bootcamp
+exports.setUserId = catchAsync(async (req, res, next) => {
+  if (!req.body.user) req.body.user = req.user.id;
+
+  // If the user is not admin, they can only add one bootcamp
+  const hasUserBootcamp = await Bootcamp.exists({ user: req.user.id });
+  if (hasUserBootcamp && req.user.role !== 'admin')
+    return next(
+      new ErrorResponse('You have already published a bootcamp', 400)
+    );
+
+  next();
+});
+
+// Make sure only bootcamp owners are allowed to update and delete their bootcamps
+exports.handlePermission = catchAsync(async (req, res, next) => {
+  // 1. Check if bootcamp exists
+  const bootcamp = await Bootcamp.findById(req.params.id);
+  if (!bootcamp)
+    return next(new ErrorResponse('No bootcamp found with that ID', 404));
+  // 2. Make sure user is the bootcamp owner
+  if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin')
+    return next(
+      new ErrorResponse(
+        'You do not have permission to perform this action',
+        403
+      )
+    );
+
+  next();
 });
 
 // CRUD operations Handlers ( Create, Read, Update, Delete)
