@@ -118,6 +118,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   next();
 });
 
+// Restrict routes
 exports.restrictTo = (...roles) => (req, res, next) => {
   if (!roles.includes(req.user.role)) {
     return next(
@@ -130,6 +131,26 @@ exports.restrictTo = (...roles) => (req, res, next) => {
   next();
 };
 
+// Update user password
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  // 1) Get user from DB based on id
+  const user = await User.findById(req.user.id).select('+password');
+  // 2) Check if posted password is correct
+  const { currentPassword, password, passwordConfirm } = req.body;
+  if (!currentPassword)
+    return next(new ErrorResponse('Please provide your current password', 400));
+  if (!(await user.verifyPassword(currentPassword))) {
+    return next(new ErrorResponse('Your current password is wrong!', 401));
+  }
+  // 3) Update the password
+  user.password = password;
+  user.passwordConfirm = passwordConfirm;
+  await user.save();
+  // 4) Log the user in
+  createAndSendToken(user, 200, req, res);
+});
+
+// Forgot password ? (:
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on provided email
   const user = await User.findOne({ email: req.body.email });
@@ -166,6 +187,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   }
 });
 
+// Reset Password
 exports.resetPassword = catchAsync(async (req, res, next) => {
   // 1) Get user based on sent token
   const hashedToken = crypto
