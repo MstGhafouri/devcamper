@@ -1,4 +1,5 @@
 const User = require('../models/userModel');
+const ErrorResponse = require('../utils/errorResponse');
 const catchAsync = require('../utils/catchAsync');
 const serviceController = require('./serviceController');
 
@@ -12,6 +13,39 @@ exports.deleteMe = catchAsync(async (req, res, next) => {
   res.status(204).json({
     status: 'success',
     data: null
+  });
+});
+
+exports.updateMe = catchAsync(async (req, res, next) => {
+  // 1) Check if the user tries to update password, if so return an error
+  if ('password' in req.body || 'passwordConfirm' in req.body) {
+    return next(
+      new ErrorResponse(
+        'This route is not for updating password. Please use /updatePassword instead!',
+        400
+      )
+    );
+  }
+  // 2) Update just name and email fields
+  const fieldsToUpdate = {
+    name: req.body.name,
+    email: req.body.email
+  };
+  // 3) Update the user
+  const updatedUser = await User.findByIdAndUpdate(
+    req.user.id,
+    fieldsToUpdate,
+    {
+      new: true,
+      runValidators: true
+    }
+  );
+  // 4) Send Response
+  res.status(200).json({
+    status: 'success',
+    data: {
+      user: updatedUser
+    }
   });
 });
 
