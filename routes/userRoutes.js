@@ -8,6 +8,7 @@ const router = express.Router();
 router.use(authController.protect);
 
 router.get('/me', userController.getMe, userController.getUser);
+router.delete('/deleteMe', userController.deleteMe);
 
 router.use(authController.restrictTo('admin'));
 
