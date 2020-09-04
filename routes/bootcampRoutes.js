@@ -1,8 +1,10 @@
 const express = require('express');
 
+const Bootcamp = require('../models/bootcampModel');
 const bootcampController = require('../controllers/bootcampController');
 const authController = require('../controllers/authController');
 const courseRouter = require('./courseRoutes');
+const handlePermission = require('../utils/handlePermission');
 
 const router = express.Router();
 // Nested route handler
@@ -23,7 +25,7 @@ router.use(
 
 router.patch(
   '/:id/photo',
-  bootcampController.handlePermission,
+  handlePermission(Bootcamp),
   bootcampController.photoUpload
 );
 
@@ -35,10 +37,7 @@ router.post(
 
 router
   .route('/:id')
-  .patch(bootcampController.handlePermission, bootcampController.updateBootcamp)
-  .delete(
-    bootcampController.handlePermission,
-    bootcampController.deleteBootcamp
-  );
+  .patch(handlePermission(Bootcamp), bootcampController.updateBootcamp)
+  .delete(handlePermission(Bootcamp), bootcampController.deleteBootcamp);
 
 module.exports = router;

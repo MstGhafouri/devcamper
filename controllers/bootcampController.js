@@ -94,24 +94,6 @@ exports.setUserId = catchAsync(async (req, res, next) => {
   next();
 });
 
-// Make sure only bootcamp owners are allowed to update and delete their bootcamps
-exports.handlePermission = catchAsync(async (req, res, next) => {
-  // 1. Check if bootcamp exists
-  const bootcamp = await Bootcamp.findById(req.params.id);
-  if (!bootcamp)
-    return next(new ErrorResponse('No bootcamp found with that ID', 404));
-  // 2. Make sure user is the bootcamp owner
-  if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin')
-    return next(
-      new ErrorResponse(
-        'You do not have permission to perform this action',
-        403
-      )
-    );
-
-  next();
-});
-
 // CRUD operations Handlers ( Create, Read, Update, Delete)
 exports.getAllBootcamps = serviceController.getAll(Bootcamp);
 exports.getBootcamp = serviceController.getOne(Bootcamp, { path: 'courses' });

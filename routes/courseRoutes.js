@@ -1,7 +1,9 @@
 const express = require('express');
 
+const Course = require('../models/courseModel');
 const courseController = require('../controllers/courseController');
 const authController = require('../controllers/authController');
+const handlePermission = require('../utils/handlePermission');
 
 const router = express.Router({ mergeParams: true });
 
@@ -16,13 +18,13 @@ router.use(
 
 router.post(
   '/',
-  courseController.setBootcampId,
+  courseController.setBootcampUserId,
   courseController.createNewCourse
 );
 
 router
   .route('/:id')
-  .patch(courseController.updateCourse)
-  .delete(courseController.deleteCourse);
+  .patch(handlePermission(Course), courseController.updateCourse)
+  .delete(handlePermission(Course), courseController.deleteCourse);
 
 module.exports = router;
