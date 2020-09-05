@@ -10,10 +10,7 @@ const handleCastErrorDB = err =>
 // MongoDB duplicate fields error handler
 const handleDuplicateFieldsDB = err => {
   const value = Object.values(err.keyValue)[0];
-  return new ErrorResponse(
-    `Duplicate field value: ${value}. Please use another one!`,
-    400
-  );
+  return new ErrorResponse(`Duplicate field value: ${value}`, 400);
 };
 
 // MongoDB validation error handler
