@@ -3,6 +3,10 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
 const fileUpload = require('express-fileupload');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const xss = require('xss-clean');
+const mongoSanitize = require('express-mongo-sanitize');
 
 const ErrorResponse = require('./utils/errorResponse');
 const globalErrorHandler = require('./controllers/errorController');
@@ -14,10 +18,25 @@ const authRouter = require('./routes/authRoutes');
 
 const app = express();
 
+app.use(helmet()); // Set secure headers
+// Limit requests from the same IP
+const limiter = rateLimit({
+  max: 100, // Max api request
+  windowMs: 60 * 60 * 1000, // Per one hour,
+  message: {
+    status: 'fail',
+    message: 'Too many requests from the this IP. Please try again in an hour!'
+  }
+});
+app.use(limiter);
 // Body parser, reading data from body into req.body
 app.use(express.json());
 // Cookie parser, parse the cookie that browser sends
 app.use(cookieParser());
+// Data sanitization against NoSql query injections
+app.use(mongoSanitize());
+// Data sanitization against XSS
+app.use(xss());
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
