@@ -9,6 +9,7 @@ const xss = require('xss-clean');
 const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
 const cors = require('cors');
+const compression = require('compression');
 
 const ErrorResponse = require('./utils/errorResponse');
 const globalErrorHandler = require('./controllers/errorController');
@@ -58,6 +59,8 @@ if (process.env.NODE_ENV === 'development') {
 app.use(fileUpload());
 // Serve static files
 app.use(express.static(path.resolve(__dirname, 'public')));
+// Compress responses
+app.use(compression());
 // Routes handler
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);
