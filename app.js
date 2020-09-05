@@ -7,6 +7,8 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const xss = require('xss-clean');
 const mongoSanitize = require('express-mongo-sanitize');
+const hpp = require('hpp');
+const cors = require('cors');
 
 const ErrorResponse = require('./utils/errorResponse');
 const globalErrorHandler = require('./controllers/errorController');
@@ -17,6 +19,11 @@ const userRouter = require('./routes/userRoutes');
 const authRouter = require('./routes/authRoutes');
 
 const app = express();
+// MIDDLEWARES
+
+// Enable cross-origin requests
+app.use(cors());
+app.options('*', cors());
 
 app.use(helmet()); // Set secure headers
 // Limit requests from the same IP
@@ -37,16 +44,20 @@ app.use(cookieParser());
 app.use(mongoSanitize());
 // Data sanitization against XSS
 app.use(xss());
+// Clear up query string
+app.use(
+  hpp({
+    whitelist: ['averageCost', 'averageRating']
+  })
+);
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
-
 // Express file upload middleware for uploading bootcamp images
 app.use(fileUpload());
 // Serve static files
 app.use(express.static(path.resolve(__dirname, 'public')));
-
 // Routes handler
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);
