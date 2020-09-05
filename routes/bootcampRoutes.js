@@ -4,11 +4,13 @@ const Bootcamp = require('../models/bootcampModel');
 const bootcampController = require('../controllers/bootcampController');
 const authController = require('../controllers/authController');
 const courseRouter = require('./courseRoutes');
+const reviewRouter = require('./reviewRoutes');
 const handlePermission = require('../utils/handlePermission');
 
 const router = express.Router();
 // Nested route handler
 router.use('/:bootcampId/courses', courseRouter);
+router.use('/:bootcampId/reviews', reviewRouter);
 
 router
   .route('/within/:distance/zipcode/:zipcode/unit/:unit')

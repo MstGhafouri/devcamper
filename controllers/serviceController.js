@@ -7,6 +7,7 @@ exports.getAll = Model =>
   catchAsync(async (req, res, next) => {
     // To allow nested Get courses on Bootcamp
     // /api/v1/bootcamps/:bootcampId/courses
+    // /api/v1/bootcamps/:bootcampId/reviews
     let filter = {};
     if (req.params.bootcampId) filter = { bootcamp: req.params.bootcampId };
 
