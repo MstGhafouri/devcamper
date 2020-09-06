@@ -112,7 +112,13 @@ exports.protect = catchAsync(async (req, res, next) => {
       )
     );
   }
-  // 4) Check if user changed password after the token was issued
+  // 4) Check if user has confirmed his/her email address
+  if (!user.isEmailConfirmed) {
+    return next(
+      new ErrorResponse('Please first confirm your email address', 401)
+    );
+  }
+  // 5) Check if user changed password after the token was issued
   if (user.doesUserChangePasswordAfter(decoded.iat)) {
     return next(
       new ErrorResponse(
