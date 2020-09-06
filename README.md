@@ -3,6 +3,7 @@
 All of the functionality below are implmented in this project.
 
 ### 🏁 Bootcamps
+
 - List all bootcamps in the database
    * Pagination
    * Select specific fields in result
@@ -28,6 +29,7 @@ All of the functionality below are implmented in this project.
 - Calculate the average rating from the reviews for a bootcamp
 
 ### 📓 Courses
+
 - List all courses for bootcamp
 - List all courses in general
   * Pagination, filtering, etc
@@ -43,6 +45,7 @@ All of the functionality below are implmented in this project.
   * Owner only
   
 ### 💬 Reviews
+
 - List all reviews for a bootcamp
 - List all reviews in general
   * Pagination, filtering, etc
@@ -56,12 +59,15 @@ All of the functionality below are implmented in this project.
   * Owner only
 
 ### 👨👦 Users & Authentication
+
 - Authentication will be ton using JWT/cookies
   * JWT and cookie should expire in 30 days
 - User registration
   * Register as a "user" or "publisher"
   * Once registered, a token will be sent along with a cookie (token = xxx)
   * Passwords must be hashed
+- Confirm user email
+  * Once registered, a confirmation email will be sent along with a token
 - User login
   * User can login with email and password
   * Plain text password will compare with stored hashed password
@@ -83,6 +89,7 @@ All of the functionality below are implmented in this project.
 - Users can only be made admin by updating the database field manually
 
 ## 🔐 Security
+
 - Encrypt passwords and reset tokens
 - Prevent cross site scripting - XSS
 - Prevent NoSQL injections
