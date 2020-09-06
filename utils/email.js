@@ -54,6 +54,10 @@ class Email {
     await this.send('welcome', 'Welcome to the Devcamper Family!');
   }
 
+  async sendEmailConfirm() {
+    await this.send('emailConfirm', 'Email confirmation token');
+  }
+
   async sendPasswordReset() {
     await this.send(
       'passwordReset',

@@ -20,6 +20,7 @@ const createAndSendToken = (user, statusCode, req, res) => {
   // Remove password and active from the output
   user.password = undefined;
   user.active = undefined;
+  user.confirmEmailToken = undefined;
   user.__v = undefined;
 
   res.status(statusCode).json({
@@ -43,8 +44,15 @@ exports.signup = catchAsync(async (req, res, next) => {
     passwordConfirm
   });
 
-  const url = `${req.protocol}://${req.get('host')}/me`;
-  await new Email(newUser, url).sendWelcome();
+  // Generate email confirm token
+  const token = newUser.createConfirmEmailToken();
+
+  await newUser.save({ validateBeforeSave: false });
+
+  const url = `${req.protocol}://${req.get(
+    'host'
+  )}/api/v1/auth/confirmEmail?token=${token}`;
+  await new Email(newUser, url).sendEmailConfirm();
 
   createAndSendToken(newUser, 201, req, res);
 });
@@ -209,5 +217,42 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   user.passwordResetExpiresAt = undefined;
   await user.save();
   // 3) Log the user in, send jwt
+  createAndSendToken(user, 200, req, res);
+});
+
+exports.confirmEmail = catchAsync(async (req, res, next) => {
+  // 1. Get token from query
+  const { token } = req.query;
+
+  if (!token) {
+    return next(new ErrorResponse('Token is invalid', 400));
+  }
+
+  // 2. Generate hashed token and then compare it with the original token
+  const confirmEmailToken = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+
+  // 3. Get user by token
+  const user = await User.findOne({
+    confirmEmailToken,
+    isEmailConfirmed: false
+  });
+
+  if (!user) {
+    return next(new ErrorResponse('Token is invalid', 400));
+  }
+
+  // 4. Update user and save it to database
+  user.confirmEmailToken = undefined;
+  user.isEmailConfirmed = true;
+  await user.save({ validateBeforeSave: false });
+
+  // 5. Send welcome email
+  const url = `${req.protocol}://${req.get('host')}/me`;
+  await new Email(user, url).sendWelcome();
+
+  // 6. Log the user in, send jwt
   createAndSendToken(user, 200, req, res);
 });

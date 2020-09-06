@@ -54,7 +54,12 @@ const userSchema = new mongoose.Schema({
   },
   passwordChangedAt: Date,
   passwordResetToken: String,
-  passwordResetExpiresAt: Date
+  passwordResetExpiresAt: Date,
+  confirmEmailToken: String,
+  isEmailConfirmed: {
+    type: Boolean,
+    default: false
+  }
 });
 
 // Hash password
@@ -97,7 +102,16 @@ userSchema.methods.createPasswordResetToken = function () {
 
   return resetToken;
 };
+// Method to generate confirm email token
+userSchema.methods.createConfirmEmailToken = function () {
+  const confirmToken = crypto.randomBytes(32).toString('hex');
+  this.confirmEmailToken = crypto
+    .createHash('sha256')
+    .update(confirmToken)
+    .digest('hex');
 
+  return confirmToken;
+};
 // Method to check if the user has changed his password after jwt was issued
 userSchema.methods.doesUserChangePasswordAfter = function (jwtTimeStamp) {
   if (this.passwordChangedAt) {
